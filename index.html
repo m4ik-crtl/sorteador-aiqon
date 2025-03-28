@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio Aiqon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #00b7c8, #002b36);
+            color: white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            color: #005860;
+        }
+        .logo {
+            max-width: 150px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        h1 {
+            color: #666;
+            font-weight: 600;
+        }
+        textarea, button {
+            width: 340px;
+            height: 40px;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            background-color: #005860;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            transition: background 0.3s ease-in-out, transform 0.2s;
+        }
+        button:hover {
+            background-color: #003f47;
+            transform: scale(1.05);
+        }
+        .hidden {
+            display: none;
+        }
+        .countdown {
+            font-size: 30px;
+            font-weight: bold;
+            color: #00a5b9;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .result {
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 22px;
+            color: #00d4ff;
+            animation: fadeIn 1s;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+        }
+        ul li {
+            background: #00a5b9;
+            color: #ffffff;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://aiqon.com.br/assets/img/common/aiqon.svg" alt="Logo Aiqon" class="logo">
+        <h1>Sorteador AIQON</h1>
+        <textarea id="nameInput" placeholder="Digite os nomes ou números, separados por vírgula ou quebra de linha"></textarea>
+        <button onclick="addParticipants()">Adicionar</button>
+        <button onclick="startCountdown()">Sortear</button>
+        <div id="countdown" class="countdown hidden"></div>
+        <div id="winner" class="result hidden"></div>
+        <button id="orderBtn" class="hidden" onclick="showRanking()">Mostrar Ordem dos Demais</button>
+        <ul id="ranking" class="hidden"></ul>
+    </div>
+
+    <script>
+        let participants = [];
+        let sortedParticipants = [];
+        
+
+        function addParticipants() {
+            let input = document.getElementById('nameInput').value.trim();
+            if (input) {
+                let names = input.split(/[,\n]+/).map(name => name.trim()).filter(name => name);
+                participants.push(...names);
+                document.getElementById('nameInput').value = '';
+            }
+        }
+        
+        function startCountdown() {
+            if (participants.length < 2) {
+                alert('Adicione pelo menos dois participantes!');
+                return;
+            }
+            document.getElementById('winner').classList.add('hidden');
+            document.getElementById('countdown').classList.remove('hidden');
+            let countdownElement = document.getElementById('countdown');
+            let count = 3;
+            countdownElement.innerHTML = `Sorteando em... ${count}`;
+            let interval = setInterval(() => {
+                count--;
+                countdownElement.innerHTML = `Sorteando em... ${count}`;
+                if (count === 0) {
+                    clearInterval(interval);
+                    countdownElement.classList.add('hidden');
+                    drawWinner();
+                }
+            }, 1000);
+        }
+        
+        function drawWinner() {
+            sortedParticipants = [...participants].sort(() => Math.random() - 0.5);
+            let winnerElement = document.getElementById('winner');
+            winnerElement.innerHTML = `🏆 Vencedor: <strong>${sortedParticipants[0]}</strong>`;
+            winnerElement.classList.remove('hidden');
+            document.getElementById('orderBtn').classList.remove('hidden');
+        }
+        
+        function showRanking() {
+            let rankingList = document.getElementById('ranking');
+            rankingList.innerHTML = '';
+            for (let i = 1; i < sortedParticipants.length; i++) {
+                let li = document.createElement('li');
+                li.textContent = `${i + 1}º - ${sortedParticipants[i]}`;
+                rankingList.appendChild(li);
+            }
+            rankingList.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
