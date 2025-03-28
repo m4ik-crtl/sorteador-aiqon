@@ -27,8 +27,3 @@ Este é um simples sorteador de participantes desenvolvido para ser utilizado em
 - **CSS**: Para estilização da interface.
 - **JavaScript**: Para a lógica de sorteio, exibição e interação do usuário.
 
-## Como rodar localmente
-
-1. Faça o clone deste repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/sorteador-aiqon.git
