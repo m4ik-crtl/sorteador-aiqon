@@ -1,4 +1,4 @@
-# Sorteador AIQON
+# Sorteador
 
 Este é um simples sorteador de participantes desenvolvido para ser utilizado em sorteios online. O código permite que o usuário insira uma lista de participantes, faça o sorteio de um vencedor, visualize a ordem dos participantes e baixe o resultado em formato `.txt`.
 
