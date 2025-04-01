@@ -130,10 +130,10 @@
             document.getElementById('countdown').classList.remove('hidden');
             let countdownElement = document.getElementById('countdown');
             let count = 3;
-            countdownElement.innerHTML = Sorteando em... ${count};
+            countdownElement.innerHTML = `Sorteando em... ${count}`;
             let interval = setInterval(() => {
                 count--;
-                countdownElement.innerHTML = Sorteando em... ${count};
+                countdownElement.innerHTML = `Sorteando em... ${count}`;
                 if (count === 0) {
                     clearInterval(interval);
                     countdownElement.classList.add('hidden');
@@ -145,7 +145,7 @@
         function drawWinner() {
             sortedParticipants = [...participants].sort(() => Math.random() - 0.5);
             let winnerElement = document.getElementById('winner');
-            winnerElement.innerHTML = 🏆 Vencedor: <strong>${sortedParticipants[0]}</strong>;
+            winnerElement.innerHTML = `🏆 Vencedor: <strong>${sortedParticipants[0]}</strong>`;
             winnerElement.classList.remove('hidden');
             document.getElementById('orderBtn').classList.remove('hidden');
             document.getElementById('downloadBtn').classList.remove('hidden');
@@ -160,14 +160,14 @@
             rankingList.innerHTML = '';
             for (let i = 1; i < sortedParticipants.length; i++) {
                 let li = document.createElement('li');
-                li.textContent = ${i + 1}º - ${sortedParticipants[i]};
+                li.textContent = `${i + 1}º - ${sortedParticipants[i]}`;
                 rankingList.appendChild(li);
             }
             rankingList.classList.remove('hidden');
         }
 
         function downloadResults() {
-            const text = sortedParticipants.map((name, index) => ${index + 1}º - ${name}).join('\n');
+            const text = sortedParticipants.map((name, index) => `${index + 1}º - ${name}`).join('\n');
             const blob = new Blob([text], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
