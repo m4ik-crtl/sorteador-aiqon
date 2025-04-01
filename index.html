@@ -16,8 +16,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
+            height: 100vh;
         }
         .container {
             max-width: 400px;
@@ -108,5 +107,77 @@
         <button id="restartBtn" class="hidden" onclick="restart()">Sortear Novamente</button>
         <ul id="ranking" class="hidden"></ul>
     </div>
+
+    <script>
+        let participants = [];
+        let sortedParticipants = [];
+
+        function addParticipants() {
+            let input = document.getElementById('nameInput').value.trim();
+            if (input) {
+                let names = input.split(/[,\n]+/).map(name => name.trim()).filter(name => name);
+                participants.push(...names);
+                document.getElementById('nameInput').value = '';
+            }
+        }
+
+        function startCountdown() {
+            if (participants.length < 2) {
+                alert('Adicione pelo menos dois participantes!');
+                return;
+            }
+            document.getElementById('winner').classList.add('hidden');
+            document.getElementById('countdown').classList.remove('hidden');
+            let countdownElement = document.getElementById('countdown');
+            let count = 3;
+            countdownElement.innerHTML = Sorteando em... ${count};
+            let interval = setInterval(() => {
+                count--;
+                countdownElement.innerHTML = Sorteando em... ${count};
+                if (count === 0) {
+                    clearInterval(interval);
+                    countdownElement.classList.add('hidden');
+                    drawWinner();
+                }
+            }, 1000);
+        }
+
+        function drawWinner() {
+            sortedParticipants = [...participants].sort(() => Math.random() - 0.5);
+            let winnerElement = document.getElementById('winner');
+            winnerElement.innerHTML = 🏆 Vencedor: <strong>${sortedParticipants[0]}</strong>;
+            winnerElement.classList.remove('hidden');
+            document.getElementById('orderBtn').classList.remove('hidden');
+            document.getElementById('downloadBtn').classList.remove('hidden');
+            document.getElementById('restartBtn').classList.remove('hidden');
+            document.getElementById('drawBtn').classList.add('hidden');
+            document.getElementById('addBtn').classList.add('hidden');
+            document.getElementById('nameInput').classList.add('hidden'); // Esconde o campo de input
+        }
+
+        function showRanking() {
+            let rankingList = document.getElementById('ranking');
+            rankingList.innerHTML = '';
+            for (let i = 1; i < sortedParticipants.length; i++) {
+                let li = document.createElement('li');
+                li.textContent = ${i + 1}º - ${sortedParticipants[i]};
+                rankingList.appendChild(li);
+            }
+            rankingList.classList.remove('hidden');
+        }
+
+        function downloadResults() {
+            const text = sortedParticipants.map((name, index) => ${index + 1}º - ${name}).join('\n');
+            const blob = new Blob([text], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'resultado_sorteio.txt';
+            link.click();
+        }
+
+        function restart() {
+            location.reload();
+        }
+    </script>
 </body>
 </html>
