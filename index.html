@@ -16,9 +16,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
         }
         .container {
+            width: 90%;
             max-width: 400px;
             background: white;
             padding: 20px;
@@ -26,6 +27,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             text-align: center;
             color: #005860;
+            overflow: hidden;
         }
         .logo {
             max-width: 150px;
@@ -87,6 +89,24 @@
             font-weight: bold;
             animation: fadeIn 0.5s ease-in-out;
         }
+
+        /* 🔧 Correção: scroll no ranking */
+        #ranking {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        /* Scroll estilizado */
+        #ranking::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #ranking::-webkit-scrollbar-thumb {
+            background-color: #007d8a;
+            border-radius: 4px;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -152,7 +172,7 @@
             document.getElementById('restartBtn').classList.remove('hidden');
             document.getElementById('drawBtn').classList.add('hidden');
             document.getElementById('addBtn').classList.add('hidden');
-            document.getElementById('nameInput').classList.add('hidden'); // Esconde o campo de input
+            document.getElementById('nameInput').classList.add('hidden');
         }
 
         function showRanking() {
@@ -160,23 +180,36 @@
             rankingList.innerHTML = '';
             for (let i = 1; i < sortedParticipants.length; i++) {
                 let li = document.createElement('li');
-                li.textContent = `${i + 1}º - ${sortedParticipants[i]}`;
+                li.textContent = `${i + 1}º: ${sortedParticipants[i]}`;
                 rankingList.appendChild(li);
             }
             rankingList.classList.remove('hidden');
         }
 
         function downloadResults() {
-            const text = sortedParticipants.map((name, index) => `${index + 1}º - ${name}`).join('\n');
-            const blob = new Blob([text], { type: 'text/plain' });
-            const link = document.createElement('a');
+            let text = `🏆 Vencedor: ${sortedParticipants[0]}\n\nDemais colocados:\n`;
+            for (let i = 1; i < sortedParticipants.length; i++) {
+                text += `${i + 1}º: ${sortedParticipants[i]}\n`;
+            }
+
+            let blob = new Blob([text], { type: 'text/plain' });
+            let link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'resultado_sorteio.txt';
             link.click();
         }
 
         function restart() {
-            location.reload();
+            document.getElementById('winner').classList.add('hidden');
+            document.getElementById('orderBtn').classList.add('hidden');
+            document.getElementById('downloadBtn').classList.add('hidden');
+            document.getElementById('restartBtn').classList.add('hidden');
+            document.getElementById('ranking').classList.add('hidden');
+            document.getElementById('drawBtn').classList.remove('hidden');
+            document.getElementById('addBtn').classList.remove('hidden');
+            document.getElementById('nameInput').classList.remove('hidden');
+            participants = [];
+            sortedParticipants = [];
         }
     </script>
 </body>
