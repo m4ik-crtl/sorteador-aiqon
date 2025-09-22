@@ -1,17 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Seletores de Elementos ---
+    // --- Seletores de Elementos (adicionados seletores do modal) ---
     const nameInput = document.getElementById('nameInput');
     const addBtn = document.getElementById('addBtn');
     const drawBtn = document.getElementById('drawBtn');
     const countdownEl = document.getElementById('countdown');
     const winnerEl = document.getElementById('winner');
-    const orderBtn = document.getElementById('orderBtn');
+    const orderBtn = document.getElementById('orderBtn'); // Botão para abrir o modal
     const downloadBtn = document.getElementById('downloadBtn');
     const restartBtn = document.getElementById('restartBtn');
-    const rankingList = document.getElementById('ranking');
     const container = document.querySelector('.container');
     const participantsListEl = document.getElementById('participants-list');
     const themeToggle = document.getElementById('theme-toggle');
+    const clearBtn = document.getElementById('clearBtn');
+    
+    // Seletores do Modal
+    const rankingModal = document.getElementById('rankingModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const rankingListModal = document.getElementById('rankingListModal');
+
 
     // --- Estado da Aplicação ---
     let participants = [];
@@ -19,13 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Funções Principais ---
 
-    // Carrega dados salvos e aplica o tema ao iniciar
     function initializeApp() {
-        // Carrega tema
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.body.classList.toggle('dark-mode', savedTheme === 'dark');
-
-        // Carrega participantes
         const savedParticipants = JSON.parse(localStorage.getItem('participants'));
         if (savedParticipants && savedParticipants.length > 0) {
             participants = savedParticipants;
@@ -33,42 +35,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Renderiza as tags dos participantes na tela
     function renderParticipants() {
         participantsListEl.innerHTML = '';
-        participants.forEach((participant, index) => {
-            const tag = document.createElement('div');
-            tag.className = 'participant-tag';
-            tag.innerHTML = `
-                <span>${participant}</span>
-                <button data-index="${index}"><i class="fas fa-times"></i></button>
-            `;
-            participantsListEl.appendChild(tag);
-        });
+        if (participants.length === 0) {
+            participantsListEl.innerHTML = '<p style="text-align: center; color: var(--text-color); opacity: 0.7;">Nenhum participante adicionado.</p>';
+        } else {
+            participants.forEach((participant, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'participant-tag';
+                tag.innerHTML = `<span>${participant}</span><button data-index="${index}"><i class="fas fa-times"></i></button>`;
+                participantsListEl.appendChild(tag);
+            });
+        }
         localStorage.setItem('participants', JSON.stringify(participants));
     }
 
-    // Adiciona novos participantes da textarea
+    function clearAllParticipants() {
+        if (confirm('Tem certeza que deseja remover TODOS os participantes da lista?')) {
+            participants = [];
+            localStorage.removeItem('participants');
+            renderParticipants();
+        }
+    }
+
     function addParticipants() {
         const input = nameInput.value.trim();
         if (input) {
-            const newNames = input.split(/[,\n]+/)
-                .map(name => name.trim())
-                .filter(name => name && !participants.includes(name));
-            
+            const newNames = input.split(/[,\n]+/).map(name => name.trim()).filter(name => name && !participants.includes(name));
             participants.push(...newNames);
             nameInput.value = '';
             renderParticipants();
         }
     }
 
-    // Remove um participante pelo índice (clicando no 'x')
     function removeParticipant(index) {
         participants.splice(index, 1);
         renderParticipants();
     }
 
-    // Algoritmo Fisher-Yates para embaralhamento justo
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -77,17 +81,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return array;
     }
 
-    // Inicia a contagem regressiva para o sorteio
     function startCountdown() {
         if (participants.length < 2) {
-            alert('Adicione pelo menos dois participantes!');
+            alert('Adicione pelo menos dois participantes para o sorteio!');
             return;
         }
         container.classList.add('results-view');
+        orderBtn.style.display = 'none'; // Esconde o botão até o sorteio terminar
         
         let count = 3;
         countdownEl.innerHTML = `Sorteando em... ${count}`;
-        
         const interval = setInterval(() => {
             count--;
             countdownEl.innerHTML = `Sorteando em... ${count}`;
@@ -99,40 +102,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
-    // Sorteia o vencedor com efeito roleta e confetes
     function drawWinnerWithRoulette() {
         const animationDuration = 3000;
         const spinInterval = 75;
         let rouletteInterval;
         const shuffledForRoulette = shuffleArray([...participants]);
         let currentIndex = 0;
-
         rouletteInterval = setInterval(() => {
             currentIndex = (currentIndex + 1) % shuffledForRoulette.length;
             winnerEl.innerHTML = `<strong>${shuffledForRoulette[currentIndex]}</strong>`;
         }, spinInterval);
-
         setTimeout(() => {
             clearInterval(rouletteInterval);
             sortedParticipants = shuffleArray([...participants]);
             const finalWinner = sortedParticipants[0];
             winnerEl.innerHTML = `🏆 Vencedor(a): <strong>${finalWinner}</strong>`;
-            
             confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-            
             orderBtn.style.display = sortedParticipants.length > 1 ? 'flex' : 'none';
         }, animationDuration);
     }
 
-    function showRanking() {
-        rankingList.innerHTML = '';
-        for (let i = 1; i < sortedParticipants.length; i++) {
+    // --- NOVAS FUNÇÕES PARA O MODAL ---
+    function openRankingModal() {
+        rankingListModal.innerHTML = ''; // Limpa a lista antes de preencher
+        for (let i = 0; i < sortedParticipants.length; i++) {
             const li = document.createElement('li');
-            li.textContent = `${i + 1}º lugar: ${sortedParticipants[i]}`;
-            rankingList.appendChild(li);
+            const place = i === 0 ? '🏆' : `${i + 1}º`;
+            li.innerHTML = `<strong>${place}:</strong> ${sortedParticipants[i]}`;
+            rankingListModal.appendChild(li);
         }
-        rankingList.style.display = 'block';
-        orderBtn.style.display = 'none';
+        rankingModal.classList.add('active'); // Mostra o modal
+    }
+
+    function closeRankingModal() {
+        rankingModal.classList.remove('active'); // Esconde o modal
     }
 
     function downloadResults() {
@@ -146,26 +149,36 @@ document.addEventListener('DOMContentLoaded', () => {
         link.download = 'resultado_sorteio_aiqon.txt';
         link.click();
     }
-
-    function restart() {
-        // Não apaga a lista de participantes, apenas a tela de resultados
-        sortedParticipants = [];
-        rankingList.innerHTML = '';
-        rankingList.style.display = 'none';
-        orderBtn.style.display = 'flex';
-        container.classList.remove('results-view');
-        // Para um novo sorteio completo, limpando a lista:
-        // participants = [];
-        // localStorage.removeItem('participants');
-        // renderParticipants();
+    
+    // A função de "Novo Sorteio" agora limpa a lista e reinicia a tela
+    function newSweepstakes() {
+        if (confirm('Deseja iniciar um NOVO SORTEIO? A lista de participantes será limpa.')) {
+            participants = [];
+            localStorage.removeItem('participants');
+            renderParticipants();
+            
+            sortedParticipants = [];
+            container.classList.remove('results-view');
+            winnerEl.innerHTML = '';
+        }
     }
 
-    // --- Event Listeners ---
+    // --- Event Listeners (ATUALIZADOS) ---
     addBtn.addEventListener('click', addParticipants);
     drawBtn.addEventListener('click', startCountdown);
-    orderBtn.addEventListener('click', showRanking);
+    clearBtn.addEventListener('click', clearAllParticipants);
     downloadBtn.addEventListener('click', downloadResults);
-    restartBtn.addEventListener('click', restart);
+    restartBtn.addEventListener('click', newSweepstakes);
+    
+    // Eventos do Modal
+    orderBtn.addEventListener('click', openRankingModal);
+    modalCloseBtn.addEventListener('click', closeRankingModal);
+    rankingModal.addEventListener('click', (e) => {
+        // Fecha o modal se clicar no fundo escuro (overlay)
+        if (e.target === rankingModal) {
+            closeRankingModal();
+        }
+    });
 
     participantsListEl.addEventListener('click', (e) => {
         if (e.target.closest('button')) {
